@@ -16,8 +16,16 @@ class Dataset(object):
 
     def prepare_for_learning(self):
         self.trainset, self.testset = train_test_split(self.raw_data, test_size = 0.2)
-        self.trainset_labels = np.reshape(self.trainset["label"].as_matrix(), (len(self.trainset["label"]), 1))
-        self.testset_labels = np.reshape(self.testset["label"].as_matrix(), (len(self.testset["label"]), 1) )
+        # Yes, the label matrix it's redundant in this example for binary classication
+        # But learning to do it this way opens the door to Multiclass classification
+        self.trainset_labels = pd.DataFrame({
+            'y1' : self.trainset["label"].as_matrix(), 
+            'y2' : (self.trainset["label"] == 0).astype(int).as_matrix()
+        }).as_matrix()
+        self.testset_labels = pd.DataFrame({
+            'y1' : self.testset["label"].as_matrix(), 
+            'y2' : (self.testset["label"] == 0).astype(int).as_matrix()
+        }).as_matrix()
         self.trainset = self.trainset.drop("label", 1).as_matrix()
         self.testset = self.testset.drop("label", 1).as_matrix()
 
