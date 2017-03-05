@@ -23,16 +23,10 @@ class NeuralNetwork():
         for iteration in xrange(number_of_iterations):
             # pass the training set through the neural net
             predicted_label = self.predict(training_set_inputs)
-            print "predicted_label.shape", predicted_label.shape
-            print "training_set_labels", training_set_labels.shape
             # calculate the error
             error = training_set_labels - predicted_label
-            print "error.shape", error.shape
             # multiply the error by the input and again by the gradient of the sigmoid curve
             adjusment = dot(training_set_inputs.T, error * self.__sigmoid_derivative(predicted_label))
-            print "adjusment.shape", adjusment.shape
-            print "self.synaptic_weigths.shape", self.synaptic_weigths.shape
-            print "---------------------"
             # update weights (backpropagation)
             self.synaptic_weigths += adjusment
 
