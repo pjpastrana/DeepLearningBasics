@@ -14,6 +14,7 @@ class SingleLayerTensorFlowNeuralNetwork(object):
         self.y_ = None
         self.cost = None
         self.optimizer = None
+        self.tfsession = None
 
 
     def create_model(self, num_samples, num_features, num_classes):
@@ -45,28 +46,37 @@ class SingleLayerTensorFlowNeuralNetwork(object):
         self.cost = tf.reduce_sum(tf.pow(self.y_ - self.y, 2))/(2*num_samples)
         
         # Gradient descent
-        learning_rate = 0.000001
+        # learning_rate = 0.000001
+        learning_rate = 0.1
         self.optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(self.cost)
 
     def train(self, inputX, inputY):
         # Initialize variables and tensorflow session
         init = tf.initialize_all_variables()
-        sess = tf.Session()
-        sess.run(init)
+        self.tfsession = tf.Session()
+        self.tfsession.run(init)
 
-        training_epochs = 2000
+        training_epochs = 10000
         display_step = 50
 
         for i in range(training_epochs):
             # Take a gradient descent step using our inputs and labels
-            sess.run(self.optimizer, feed_dict={self.x: inputX, self.y_: inputY})
+            self.tfsession.run(self.optimizer, feed_dict={self.x: inputX, self.y_: inputY})
 
             # That's all! The rest of the cell just outputs debug messages. 
             # Display logs per epoch step
             if (i) % display_step == 0:
-                cc = sess.run(self.cost, feed_dict={self.x: inputX, self.y_:inputY})
-                print "Training step:", '%04d' % (i), "cost=", "{:.9f}".format(cc) #, \"W=", sess.run(W), "b=", sess.run(b)
+                cc = self.tfsession.run(self.cost, feed_dict={self.x: inputX, self.y_:inputY})
+                print "Training step:", '%04d' % (i), "cost=", "{:.9f}".format(cc)
 
         print "Optimization Finished!"
-        training_cost = sess.run(self.cost, feed_dict={self.x: inputX, self.y_: inputY})
-        print "Training cost=", training_cost, "W=", sess.run(self.W), "b=", sess.run(self.b), '\n'
+        training_cost = self.tfsession.run(self.cost, feed_dict={self.x: inputX, self.y_: inputY})
+        print "Training cost=", training_cost, "W=", self.tfsession.run(self.W), "b=", self.tfsession.run(self.b), '\n'
+
+    # TODO: revisit
+    def score(self, input, labels):
+        classification_scores = self.tfsession.run(self.y, feed_dict={self.x:input})
+        self.tfsession.close()
+        classification_labels = classification_scores.argmax(1)
+        print sum(labels[:, 0] - classification_labels)
+

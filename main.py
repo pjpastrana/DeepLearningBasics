@@ -5,12 +5,36 @@ from single_layer_numpy_nn_classifier.neural_network import NeuralNetwork
 from single_layer_tensorflow_nn_classifier.neural_network import SingleLayerTensorFlowNeuralNetwork
 
 def main():
+    print "Loading data"
     dataset = Dataset()
     dataset.load("data/voicegender.csv")
     dataset.prepare_for_learning()
 
-    # example_1(dataset)
-    example_2(dataset)
+    selected_example = show_menu_options()
+    if selected_example == 1:
+        example_1(dataset)
+    elif selected_example == 2:
+        example_2(dataset)
+
+
+def show_menu_options():
+    menu_options = [
+        "Simple Neural Network",
+        "Single layer TensorFlow NeuralNetwork Classifier",
+        "Two layer TensorFlow NeuraNetwork Classifier",
+        "Applying convolutions"
+    ]
+    for i in range(len(menu_options)):
+        print i+1, menu_options[i]
+    print "\n"
+
+    selected_example = -1
+    try:
+        selected_example = int(raw_input('Select Example to run: '))
+    except ValueError:
+        print "Invalid option"
+        exit(1)
+    return selected_example
 
 
 def example_1(dataset):
@@ -35,6 +59,7 @@ def example_2(dataset):
     tensorflow_nn = SingleLayerTensorFlowNeuralNetwork()
     tensorflow_nn.create_model(num_samples, num_features, num_classes)
     tensorflow_nn.train(dataset.trainset, dataset.trainset_labels)
+    tensorflow_nn.score(dataset.testset, dataset.testset_labels)
 
 
 
