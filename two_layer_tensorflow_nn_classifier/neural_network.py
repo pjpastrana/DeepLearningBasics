@@ -2,13 +2,18 @@ import tensorflow as tf
 
 # This is a simple neural network implement logistic regression using tensor flow
 # y = Wx + b
-class SingleLayerTensorFlowNeuralNetwork(object):
+class TwoLayerTensorFlowNeuralNetwork(object):
     def __init__(self):
-        super(SingleLayerTensorFlowNeuralNetwork, self).__init__()
+        super(TwoLayerTensorFlowNeuralNetwork, self).__init__()
         # model arguments and functions
         self.x = None
-        self.W = None
-        self.b = None
+
+        self.W_01 = None
+        self.b_01 = None
+        self.z = None
+        self.W_12 = None
+        self.b_12 = None
+
         self.y_values = None
         self.y = None
         self.y_ = None
@@ -18,22 +23,24 @@ class SingleLayerTensorFlowNeuralNetwork(object):
 
 
     def create_model(self, num_samples, num_features, num_classes):
-        # Okay TensorFlow, we'll feed you an array of examples. Each example will
-        # be an array of num_features float values.
-        # "None" means we can feed you any number of examples
-        # Notice we haven't fed it the values yet
+        # learning_rate = 0.000001
+        learning_rate = 0.00001
+        num_hidden_nodes = 1024
+
+        # input layer
         self.x = tf.placeholder(tf.float32, [None, num_features])
+        self.W_01 = tf.Variable(tf.zeros([num_features, num_hidden_nodes]))
+        self.b_01 = tf.Variable(tf.zeros([num_hidden_nodes]))
 
-        # Maintain a num_features x num_classes float matrix for the weights that we'll keep updating 
-        # through the training process (make them all zero to begin with)
-        self.W = tf.Variable(tf.zeros([num_features, num_classes]))
+        # hidden layer
+        z = tf.add(tf.matmul(self.x, self.W_01), self.b_01)
+        h = tf.nn.relu(z)
 
-        # Also maintain num_classes bias values
-        self.b = tf.Variable(tf.zeros([num_classes]))
+        # output layer
+        self.W_12 = tf.Variable(tf.zeros([num_hidden_nodes, num_classes]))
+        self.b_12 = tf.Variable(tf.zeros([num_classes]))
 
-        # The first step in calculating the prediction would be to multiply
-        # the inputs matrix by the weights matrix then add the biases
-        self.y_values = tf.add(tf.matmul(self.x, self.W), self.b)
+        self.y_values = tf.add(tf.matmul(h, self.W_12), self.b_12)
 
         # Then we use softmax as an "activation function" that translates the
         # numbers outputted by the previous layer into probability form
@@ -46,8 +53,6 @@ class SingleLayerTensorFlowNeuralNetwork(object):
         self.cost = tf.reduce_sum(tf.pow(self.y_ - self.y, 2))/(2*num_samples)
         
         # Gradient descent
-        # learning_rate = 0.000001
-        learning_rate = 0.00001
         self.optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(self.cost)
 
     def train(self, inputX, inputY):
@@ -71,7 +76,7 @@ class SingleLayerTensorFlowNeuralNetwork(object):
 
         print "Optimization Finished!"
         training_cost = self.tfsession.run(self.cost, feed_dict={self.x: inputX, self.y_: inputY})
-        print "Training cost=", training_cost, "W=", self.tfsession.run(self.W), "b=", self.tfsession.run(self.b), '\n'
+        print "Training cost=", training_cost, "W=", self.tfsession.run(self.W_12), "b=", self.tfsession.run(self.b_12), '\n'
 
     # TODO: revisit
     def score(self, input, labels):

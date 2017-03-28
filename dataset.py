@@ -34,3 +34,4 @@ class Dataset(object):
         print "Trainset labels shape", self.trainset_labels.shape
         print "Testset shape", self.testset.shape
         print "Testset labels shape", self.testset_labels.shape
+        print "\n"
